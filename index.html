@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>班表載入中...</title>
+  <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+<body style="display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif; color:#666;">
+  <p>正在前往預約時段班表，請稍候...</p>
+
+  <script>
+    // 1. 填入第三步 LINE 給你的 LIFF ID
+    const LIFF_ID = "2011633987-z8JNEVbe";
+    // 2. 填入 Google Apps Script 產生的網頁應用程式網址
+    const GAS_URL = "https://liff.line.me/2011633987-z8JNEVbe";
+
+    async function main() {
+      await liff.init({ liffId: LIFF_ID });
+      if (!liff.isLoggedIn()) {
+        liff.login();
+        return;
+      }
+      
+      const profile = await liff.getProfile();
+      const uid = profile.userId;
+
+      fetch(`${GAS_URL}?uid=${uid}`)
+        .then(res => res.json())
+        .then(data => {
+          window.location.replace(data.redirectUrl);
+        })
+        .catch(err => {
+          // 異常時預設進入新客 Notion
+          window.location.replace("https://app.notion.com/p/3ddcda7efbee80529500dbd2964dece1?source=copy_link");
+        });
+    }
+    main();
+  </script>
+</body>
+</html>
