@@ -3,37 +3,42 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>班表載入中...</title>
+  <title>時段班表載入中...</title>
   <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
-<body style="display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif; color:#666;">
+<body style="display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif; color:#666; background-color:#f9f9f9;">
   <p>正在前往預約時段班表，請稍候...</p>
 
   <script>
-    // 1. 填入第三步 LINE 給你的 LIFF ID
+    // 1. 你的 LIFF ID（之前已產生）
     const LIFF_ID = "2011633987-z8JNEVbe";
-    // 2. 填入 Google Apps Script 產生的網頁應用程式網址
-    const GAS_URL = "https://liff.line.me/2011633987-z8JNEVbe";
+
+    // 2. 貼上剛才 Google Apps Script 產生的網頁應用程式網址
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbyVCNPRF1HcRp0IjDiAYxvlIN_zr97Xgo9ypLMiXUkStD1ybfTnQhFQTH9j8TDnl9_Y/exec";
+
+    // 3. 預設備用網址（貼上你的一般客 Notion 網址）
+    const DEFAULT_NOTION_URL = "https://app.notion.com/p/3ddcda7efbee80529500dbd2964dece1?source=copy_link";
 
     async function main() {
-      await liff.init({ liffId: LIFF_ID });
-      if (!liff.isLoggedIn()) {
-        liff.login();
-        return;
-      }
-      
-      const profile = await liff.getProfile();
-      const uid = profile.userId;
+      try {
+        await liff.init({ liffId: LIFF_ID });
+        if (!liff.isLoggedIn()) {
+          liff.login();
+          return;
+        }
+        
+        const profile = await liff.getProfile();
+        const uid = profile.userId;
 
-      fetch(`${GAS_URL}?uid=${uid}`)
-        .then(res => res.json())
-        .then(data => {
-          window.location.replace(data.redirectUrl);
-        })
-        .catch(err => {
-          // 異常時預設進入新客 Notion
-          window.location.replace("https://app.notion.com/p/3ddcda7efbee80529500dbd2964dece1?source=copy_link");
-        });
+        const response = await fetch(`${GAS_URL}?uid=${uid}`);
+        const data = await response.json();
+        
+        // 取得判定結果並跳轉
+        window.location.replace(data.redirectUrl);
+      } catch (err) {
+        // 若網路不穩或發生例外，預設開啟一般班表
+        window.location.replace(DEFAULT_NOTION_URL);
+      }
     }
     main();
   </script>
